@@ -1,8 +1,12 @@
 import json
 import os
+from typing import Any
 
 
 DEFAULT_SEARCH_LIMIT = 5
+
+BM25_K1 = 1.5
+BM25_B = 0.75
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 DATA_PATH = os.path.join(PROJECT_ROOT, "data", "movies.json")
@@ -16,8 +20,18 @@ def load_movies() -> list[dict]:
     return data["movies"]
 
 
-def load_stopwords():
+def load_stopwords() -> list[str]:
     with open(STOPWORDS_PATH, "r") as f:
         data = f.read()
         data = data.splitlines()
     return list(data)
+
+
+def format_search_result(doc_id: str, title: str, document: str, score:float, **metadata: Any) -> dict[str, Any]:
+    return {
+        "id": doc_id,
+        "title": title,
+        "document": document,
+        "score": round(score, 2),
+        "metadata": metadata if metadata else {}
+    }
