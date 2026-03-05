@@ -14,8 +14,7 @@ class SemanticSearch:
     def generate_embedding(self, text: str) -> list:
         if len(text) == 0:
             raise ValueError("Text shall not be empty")
-        embedding = self.model.encode(text)
-        return list(embedding)[0]
+        return self.model.encode([text])[0]
     
     def build_embeddings(self, documents: list):
         self.documents = documents
@@ -61,3 +60,10 @@ def verify_embeddings():
     embeddings = semantic_search.load_or_create_embeddings(documents)
     print(f"Number of docs:   {len(documents)}")
     print(f"Embeddings shape: {embeddings.shape[0]} vectors in {embeddings.shape[1]} dimensions")
+
+def embed_query_text(query: str):
+    semantic_search = SemanticSearch()
+    embedding = semantic_search.generate_embedding(query)
+    print(f"Query: {query}")
+    print(f"First 5 dimensions: {embedding[:5]}")
+    print(f"Shape: {embedding.shape}")
