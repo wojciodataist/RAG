@@ -3,8 +3,10 @@ from lib.semantic_search import (
     verify_model,
     embed_text,
     verify_embeddings,
-    embed_query_text
+    embed_query_text,
+    SemanticSearch
     )
+from lib.search_utils import load_movies
 
 
 def main() -> None:
@@ -21,6 +23,10 @@ def main() -> None:
     embed_query = subparsers.add_parser("embedquery", help="Generate an embedding for a search query")
     embed_query.add_argument("query", type=str, help="Query to embed")
 
+    search = subparsers.add_parser("search", help="PSearch movies by meaning")
+    search.add_argument("query", type=str, help="Query to search")
+    search.add_argument("--limit", type=int, default=5, help="Limit the results")
+
     args = parser.parse_args()
 
     match args.command:
@@ -32,6 +38,16 @@ def main() -> None:
             verify_embeddings()
         case "embedquery":
             embed_query_text(args.query)
+        case "search":
+            ss = SemanticSearch()
+            movies = load_movies()
+            ss.load_or_create_embeddings(movies)
+            results = ss.search(args.query, args.limit)
+
+            for i, result in enumerate(results, 1):
+                print(f"{i}. {result['title']} (score: {result['score']:.4f})")
+                print(f"   {result['description']}")
+                print()
         case _:
             parser.print_help()
 
