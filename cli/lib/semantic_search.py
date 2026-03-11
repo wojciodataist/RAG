@@ -1,7 +1,8 @@
 from sentence_transformers import SentenceTransformer
 import numpy as np
-from lib.search_utils import CACHE_DIR, load_movies
+from lib.search_utils import CACHE_DIR, DEFAULT_CHUNK_SIZE, load_movies
 import os
+import re
 
 
 class SemanticSearch:
@@ -99,3 +100,39 @@ def cosine_similarity(vec1, vec2):
         return 0.0
 
     return dot_product / (norm1 * norm2)
+
+def fixed_size_chunking(text: str, overlap: int, chunk_size: int = DEFAULT_CHUNK_SIZE) -> list[str]:
+    words = text.split()
+    chunks = []
+
+    n_words = len(words)
+    i = 0
+    while i < n_words:
+        chunk_words  = words[i: i + chunk_size]
+        chunks.append(" ".join(chunk_words))
+        i += chunk_size - overlap
+    
+    return chunks
+
+def chunk_text(text: str, overlap: int, chunk_size: int = DEFAULT_CHUNK_SIZE) -> None:
+    chunks = fixed_size_chunking(text, overlap, chunk_size)
+    print(f"Chunking {len(text)} characters")
+    for i, chunk in enumerate(chunks, 1):
+        print(f"{i}. {chunk}")
+
+def semantic_chunking(text: str, max_chunk_size: int, overlap:int) -> list[str]:
+    sentences = re.split(r"(?<=[.!?])\s+", text)
+    step = max_chunk_size - overlap
+
+    chunks = []
+    for start in range(0, len(sentences), step):
+        window = sentences[start : start + max_chunk_size]
+        chunk = " ".join(window)
+        chunks.append(chunk)
+    return chunks
+
+def semantic_chunk_text(text: str, max_chunk_size: int, overlap:int) -> None:
+    chunks = semantic_chunking(text, max_chunk_size, overlap)
+    print(f"Semantically chunking {len(text)} characters")
+    for i, chunk in enumerate(chunks, 1):
+        print(f"{i}. {chunk}")
