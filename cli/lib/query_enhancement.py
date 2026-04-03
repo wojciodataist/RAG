@@ -1,4 +1,6 @@
 import os
+from typing import Optional
+
 from dotenv import load_dotenv
 from google import genai
 
@@ -13,7 +15,7 @@ client = genai.Client(api_key=api_key)
 model="gemma-3-27b-it"
 
 
-def spell_correct(query):
+def spell_correct(query: str) -> str:
     prompt = f"""Fix any spelling errors in the user-provided movie search query below.
         Correct only clear, high-confidence typos. Do not rewrite, add, remove, or reorder words.
         Preserve punctuation and capitalization unless a change is required for a typo fix.
@@ -25,7 +27,7 @@ def spell_correct(query):
     return response.text.strip()
 
 
-def rewrite_query(query):
+def rewrite_query(query: str) -> str:
     prompt = f"""Rewrite the user-provided movie search query below to be more specific and searchable.
         Consider:
         - Common movie knowledge (famous actors, popular films)
@@ -48,7 +50,7 @@ def rewrite_query(query):
     return response.text.strip()
 
 
-def expand_query(query):
+def expand_query(query: str) -> str:
     prompt = f"""Expand the user-provided movie search query below with related terms.
 
         Add synonyms and related concepts that might appear in movie descriptions.
@@ -66,7 +68,7 @@ def expand_query(query):
     return query + " " + response.text.strip()
 
 
-def enhance_query(query, method):
+def enhance_query(query: str, method: Optional[str] = None) -> str:
     match method:
         case "spell":
             return spell_correct(query)
